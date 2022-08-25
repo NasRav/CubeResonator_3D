@@ -15,6 +15,7 @@ Explicit::Explicit(double X, double Y, double Z, double T, double l, int Nx, int
 	d_v.resize(_Nx);
 	d_w.resize(_Nx);
 	d_e.resize(_Nx);
+#pragma omp parallel for
 	for (int i = 0; i < _Nx; i++)
 	{
 		_ro[i].resize(_Ny);
@@ -29,6 +30,7 @@ Explicit::Explicit(double X, double Y, double Z, double T, double l, int Nx, int
 		d_e[i].resize(_Ny);
 	}
 	for (int i = 0; i < _Nx; i++)
+#pragma omp parallel for
 		for (int j = 0; j < _Ny; j++)
 		{
 			_ro[i][j].resize(_Nz);
@@ -44,6 +46,7 @@ Explicit::Explicit(double X, double Y, double Z, double T, double l, int Nx, int
 		}
 	for (int i = 0; i < _Nx; i++)
 		for (int j = 0; j < _Ny; j++)
+#pragma omp parallel for
 			for (int k = 0; k < _Nz; k++)
 			{
 				_ro[i][j][k] = _ro0;
@@ -71,20 +74,38 @@ void Explicit::calculate_dU()
 		for (int j = 1; j < _Ny - 1; j++)
 			for (int k = 1; k < _Nz - 1; k++)
 			{
-				d_ro[i][j][k] = -_ro[i][j][k]
-					* (_u[i][j][k] * L_x(_ro, i, j, k) + _v[i][j][k] * L_y(_ro, i, j, k) + _w[i][j][k] * L_z(_ro, i, j, k))
-					- (L_x(_u, i, j, k) + L_y(_v, i, j, k) + L_z(_w, i, j, k));
-				d_u[i][j][k] = _mu * _dt / (_ro[i][j][k] * _dy * _dz)
-					* (4 / 3 * L_xx(_u, i, j, k) + 1 / 3 * L_xy(_v, i, j, k) + 1 / 3 * L_xz(_w, i, j, k)
-						+ L_yy(_u, i, j, k) + L_zz(_u, i, j, k));
-				d_v[i][j][k] = _mu * _dt / (_ro[i][j][k] * _dx * _dz)
-					* (4 / 3 * L_yy(_v, i, j, k) + 1 / 3 * L_xy(_u, i, j, k) + 1 / 3 * L_yz(_w, i, j, k)
-						+ L_xx(_v, i, j, k) + L_zz(_v, i, j, k));
-				d_w[i][j][k] = _mu * _dt / (_ro[i][j][k] * _dx * _dy)
-					* (4 / 3 * L_zz(_w, i, j, k) + 1 / 3 * L_xz(_u, i, j, k) + 1 / 3 * L_yz(_v, i, j, k)
-						+ L_xx(_w, i, j, k) + L_yy(_w, i, j, k));
-				d_e[i][j][k] = _mu * _dt / (_ro[i][j][k] * _dx * _dy) * _gamma / _Pr
-					* (L_xx(_e, i, j, k) + L_yy(_e, i, j, k) + L_zz(_e, i, j, k) + H(i, j, k));
+#pragma omp parallel sections
+				{
+#pragma omp section
+					{
+						d_ro[i][j][k] = -_ro[i][j][k]
+							* (_u[i][j][k] * L_x(_ro, i, j, k) + _v[i][j][k] * L_y(_ro, i, j, k) + _w[i][j][k] * L_z(_ro, i, j, k))
+							- (L_x(_u, i, j, k) + L_y(_v, i, j, k) + L_z(_w, i, j, k));
+					}
+#pragma omp section
+					{
+						d_u[i][j][k] = _mu * _dt / (_ro[i][j][k] * _dy * _dz)
+							* (4 / 3 * L_xx(_u, i, j, k) + 1 / 3 * L_xy(_v, i, j, k) + 1 / 3 * L_xz(_w, i, j, k)
+								+ L_yy(_u, i, j, k) + L_zz(_u, i, j, k));
+					}
+#pragma omp section
+					{
+						d_v[i][j][k] = _mu * _dt / (_ro[i][j][k] * _dx * _dz)
+							* (4 / 3 * L_yy(_v, i, j, k) + 1 / 3 * L_xy(_u, i, j, k) + 1 / 3 * L_yz(_w, i, j, k)
+								+ L_xx(_v, i, j, k) + L_zz(_v, i, j, k));
+					}
+#pragma omp section
+					{
+						d_w[i][j][k] = _mu * _dt / (_ro[i][j][k] * _dx * _dy)
+							* (4 / 3 * L_zz(_w, i, j, k) + 1 / 3 * L_xz(_u, i, j, k) + 1 / 3 * L_yz(_v, i, j, k)
+								+ L_xx(_w, i, j, k) + L_yy(_w, i, j, k));
+					}
+#pragma omp section
+					{
+						d_e[i][j][k] = _mu * _dt / (_ro[i][j][k] * _dx * _dy) * _gamma / _Pr
+							* (L_xx(_e, i, j, k) + L_yy(_e, i, j, k) + L_zz(_e, i, j, k) + H(i, j, k));
+					}
+				}
 			}
 }
 
@@ -94,6 +115,7 @@ void Explicit::calculate_U(unsigned long it)
 
 	for (int i = 1; i < _Nx - 1; i++)
 		for (int j = 1; j < _Ny - 1; j++)
+#pragma omp parallel for
 			for (int k = 1; k < _Nz - 1; k++)
 			{
 				_ro[i][j][k] += d_ro[i][j][k];
@@ -103,23 +125,48 @@ void Explicit::calculate_U(unsigned long it)
 				_e[i][j][k] += d_e[i][j][k];
 			}
 	for (int i = 1; i < _Nx - 1; i++)
+#pragma omp parallel for
 		for (int j = 1; j < _Ny - 1; j++)
+		{
 			_u[i][j][0] = _U0 * sin(_omega * t);
+			_ro[i][j][0] = _ro[i][j][1];
+			_e[i][j][0] = _e[i][j][1];
+			_ro[i][j][_Nz - 1] = _ro[i][j][_Nz - 2];
+			_e[i][j][_Nz - 1] = _e[i][j][_Nz - 2];
+		}
+	for (int i = 0; i < _Nx; i++)
+#pragma omp parallel for
+		for (int k = 0; k < _Nz; k++)
+		{
+			_ro[i][0][k] = _ro[i][1][k];
+			_e[i][0][k] = _e[i][1][k];
+			_ro[i][_Ny - 1][k] = _ro[i][_Ny - 2][k];
+			_e[i][_Ny - 1][k] = _e[i][_Ny - 2][k];
+		}
+	for (int j = 0; j < _Ny; j++)
+#pragma omp parallel for
+		for (int k = 0; k < _Nz; k++)
+		{
+			_ro[0][j][k] = _ro[1][j][k];
+			_e[0][j][k] = _e[1][j][k];
+			_ro[_Nx - 1][j][k] = _ro[_Nx - 2][j][k];
+			_e[_Nx - 1][j][k] = _e[_Nx - 2][j][k];
+		}
 }
 
 double Explicit::L_x(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
 {
-	return (f[i][j][k] - f[i - 1][j][k]) / _dx;
+	return f[i][j][k] - f[i - 1][j][k];
 }
 
 double Explicit::L_y(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
 {
-	return (f[i][j][k] - f[i][j - 1][k]) / _dy;
+	return f[i][j][k] - f[i][j - 1][k];
 }
 
 double Explicit::L_z(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
 {
-	return (f[i][j][k] - f[i][j][k - 1]) / _dz;
+	return f[i][j][k] - f[i][j][k - 1];
 }
 
 double Explicit::H(int i, int j, int k)

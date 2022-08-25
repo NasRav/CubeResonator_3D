@@ -2,6 +2,7 @@
 
 #include "Resonator.h"
 #include <vector>
+#include <omp.h>
 
 class Explicit : public Resonator
 {
@@ -9,6 +10,8 @@ public:
 	Explicit(double X, double Y, double Z, double T, double l, int Nx, int Ny, int Nz);
 
 	void	calculate_dt();
+	void	calculate_dU();
+	void	calculate_U(unsigned long it);
 
 	double	L_xx(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k);
 	double	L_yy(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k);
@@ -21,8 +24,6 @@ public:
 	double	L_z(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k);
 	double	H(int i, int j, int k);
 
-	void	calculate_dU();
-	void	calculate_U(unsigned long it);
 	double	get_Pr();
 	double	get_dt();
 
@@ -41,4 +42,3 @@ private:
 	std::vector<std::vector<std::vector<double>>>	d_w;
 	std::vector<std::vector<std::vector<double>>>	d_e;
 };
-
