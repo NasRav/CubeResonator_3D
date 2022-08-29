@@ -53,7 +53,11 @@ Explicit::Explicit(double X, double Y, double Z, double T, double l, int Nx, int
 				_e[i][j][k] = 2.5 * _R_gas * _T;
 			}
 }
-
+/*
+Explicit::Explicit(std::string file_name)
+{
+}
+*/
 void Explicit::calculate_dt()
 {
 	double	d_min(_dx);
@@ -103,7 +107,7 @@ void Explicit::calculate_dU()
 #pragma omp section
 					{
 						d_e[i][j][k] = _mu * _dt / (_ro[i][j][k] * _dx * _dy) * _gamma / _Pr
-							* (L_xx(_e, i, j, k) + L_yy(_e, i, j, k) + L_zz(_e, i, j, k) + H(i, j, k));
+							* (L_xx(_e, i, j, k) + L_yy(_e, i, j, k) + L_zz(_e, i, j, k)) + H(i, j, k);
 					}
 				}
 			}
@@ -156,17 +160,17 @@ void Explicit::calculate_U(unsigned long it)
 
 double Explicit::L_x(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
 {
-	return f[i][j][k] - f[i - 1][j][k];
+	return (f[i][j][k] - f[i - 1][j][k]) / _dx;
 }
 
 double Explicit::L_y(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
 {
-	return f[i][j][k] - f[i][j - 1][k];
+	return (f[i][j][k] - f[i][j - 1][k]) / _dy;
 }
 
 double Explicit::L_z(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
 {
-	return f[i][j][k] - f[i][j][k - 1];
+	return (f[i][j][k] - f[i][j][k - 1]) / _dz;
 }
 
 double Explicit::H(int i, int j, int k)
@@ -216,4 +220,31 @@ double Explicit::get_Pr()
 double Explicit::get_dt()
 {
 	return this->_dt;
+}
+
+void Explicit::write_in_file(std::string name)
+{
+	std::vector<std::vector<std::vector<double>>>	array;
+	if (name == "ro")
+		array = _ro;
+	else if (name == "u")
+		array = _u;
+	else if (name == "v")
+		array = _v;
+	else if (name == "w")
+		array = _w;
+	else if (name == "e")
+		array = _e;
+	std::ofstream	f_out(name + "_3D_NonLinear_X=" + std::to_string(_X) + "_Y=" + std::to_string(_Y) + "_Z=" + std::to_string(_Z) + ".txt");
+	for (int k = 0; k < _Nz; k++)
+	{
+		for (int j = 0; j < _Ny; j++)
+		{
+			for (int i = 0; i < _Nx; i++)
+				f_out << array[i][j][k] << ' ';
+			f_out << std::endl;
+		}
+		f_out << std::endl;
+	}
+	f_out.close();
 }

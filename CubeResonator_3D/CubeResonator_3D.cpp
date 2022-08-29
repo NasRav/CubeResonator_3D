@@ -20,6 +20,10 @@ int main()
 		std::cout << "it = " << it << std::endl;
 		scheme.calculate_dU();
 		scheme.calculate_U(it);
+		if (it == 10)
+		{
+			scheme.write_in_file("ro");
+		}
 	}
 	return 0;
 }

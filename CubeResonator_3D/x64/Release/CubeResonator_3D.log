@@ -1,9 +1,7 @@
 ﻿  CubeResonator_3D.cpp
-  Explicit.cpp
-  Resonator.cpp
-  Generating code
-  Finished generating code
-  16 of 258 functions ( 6.2%) were compiled, the rest were copied from previous compilation.
+  Создание кода
+  5 of 449 functions ( 1.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    6 functions had inline decision re-evaluated but remain unchanged
-  CubeResonator_3D.vcxproj -> C:\Users\User\source\repos\CubeResonator_3D\x64\Release\CubeResonator_3D.exe
+    0 functions had inline decision re-evaluated but remain unchanged
+  Создание кода завершено
+  CubeResonator_3D.vcxproj -> C:\Users\42\Source\Repos\NasRav\CubeResonator_3D\x64\Release\CubeResonator_3D.exe
