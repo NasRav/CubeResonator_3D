@@ -3,8 +3,8 @@
 
 int main()
 {
-	Resonator   cube(1, 0.4, 0.4, 288.15, 0.0003);
-	Explicit	scheme(0.4, 0.4, 1, 288.15, 0.0003, 40, 40, 100);
+	Resonator   cube(1, 0.4, 0.4, 288.15, 0.00005);
+	Explicit	scheme(0.4, 0.4, 1, 288.15, 0.00005, 40, 40, 100);
 
 	std::cout << "c0 = " << cube.get_c0() << std::endl;
 	std::cout << "p0 = " << cube.get_p0() << std::endl;
@@ -15,15 +15,12 @@ int main()
 	std::cout << "Pr = " << scheme.get_Pr() << std::endl;
 	scheme.calculate_dt();
 	std::cout << "dt = " << scheme.get_dt() << std::endl;
+	scheme.write_init_file();
 	for (unsigned long it = 0; it < 100; it++)
 	{
 		std::cout << "it = " << it << std::endl;
 		scheme.calculate_dU();
 		scheme.calculate_U(it);
-		if (it == 10)
-		{
-			scheme.write_in_file("ro");
-		}
 	}
 	return 0;
 }

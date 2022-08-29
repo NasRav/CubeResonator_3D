@@ -53,11 +53,7 @@ Explicit::Explicit(double X, double Y, double Z, double T, double l, int Nx, int
 				_e[i][j][k] = 2.5 * _R_gas * _T;
 			}
 }
-/*
-Explicit::Explicit(std::string file_name)
-{
-}
-*/
+
 void Explicit::calculate_dt()
 {
 	double	d_min(_dx);
@@ -222,6 +218,13 @@ double Explicit::get_dt()
 	return this->_dt;
 }
 
+void Explicit::write_init_file()
+{
+	std::ofstream	f_out("init.txt");
+
+	f_out << _X << ' ' << _Y << ' ' << _Z << ' ' << _T << ' ' << _l << ' ' << _Nx << ' ' << _Ny << ' ' << _Nz << std::endl;
+}
+
 void Explicit::write_in_file(std::string name)
 {
 	std::vector<std::vector<std::vector<double>>>	array;
@@ -235,6 +238,9 @@ void Explicit::write_in_file(std::string name)
 		array = _w;
 	else if (name == "e")
 		array = _e;
+	else
+		return;
+
 	std::ofstream	f_out(name + "_3D_NonLinear_X=" + std::to_string(_X) + "_Y=" + std::to_string(_Y) + "_Z=" + std::to_string(_Z) + ".txt");
 	for (int k = 0; k < _Nz; k++)
 	{

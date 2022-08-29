@@ -10,7 +10,6 @@ class Explicit : public Resonator
 {
 public:
 	Explicit(double X, double Y, double Z, double T, double l, int Nx, int Ny, int Nz);
-//	Explicit(std::string file_name);
 
 	void	calculate_dt();
 	void	calculate_dU();
@@ -29,6 +28,7 @@ public:
 
 	double	get_Pr();
 	double	get_dt();
+	void	write_init_file();
 	void	write_in_file(std::string name);
 
 private:
