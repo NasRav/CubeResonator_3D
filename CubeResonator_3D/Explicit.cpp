@@ -1,5 +1,19 @@
 #include "Explicit.h"
 
+Explicit::Explicit() :
+	Resonator()
+{
+	std::cout << "here" << std::endl;
+	_Pr = 0.7;
+/*	std::ifstream	in("init.txt");
+	std::string		line;
+
+	if (in.is_open())
+		getline(in, line);
+	in.close();
+	std::cout << line << std::endl;*/
+}
+
 Explicit::Explicit(double X, double Y, double Z, double T, double l, int Nx, int Ny, int Nz) :
 	Resonator(X, Y, Z, T, l), _Nx(Nx), _Ny(Ny), _Nz(Nz),
 	_dx(_X / (_Nx - 1)), _dy(_Y / (_Ny - 1)), _dz(_Z / (_Nz - 1)),
@@ -54,8 +68,7 @@ Explicit::Explicit(double X, double Y, double Z, double T, double l, int Nx, int
 			}
 }
 
-void Explicit::calculate_dt()
-{
+void Explicit::calculate_dt() {
 	double	d_min(_dx);
 
 	if (_dy < d_min)
@@ -68,8 +81,7 @@ void Explicit::calculate_dt()
 		this->_dt = 0.15 * _ro0 * pow(d_min, 2) / _mu;
 }
 
-void Explicit::calculate_dU()
-{
+void Explicit::calculate_dU() {
 	for (int i = 1; i < _Nx - 1; i++)
 		for (int j = 1; j < _Ny - 1; j++)
 			for (int k = 1; k < _Nz - 1; k++)
@@ -109,8 +121,7 @@ void Explicit::calculate_dU()
 			}
 }
 
-void Explicit::calculate_U(unsigned long it)
-{
+void Explicit::calculate_U(unsigned long it) {
 	double	t(_dt * it);
 
 	for (int i = 1; i < _Nx - 1; i++)
@@ -154,23 +165,19 @@ void Explicit::calculate_U(unsigned long it)
 		}
 }
 
-double Explicit::L_x(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
-{
+double Explicit::L_x(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k) {
 	return (f[i][j][k] - f[i - 1][j][k]) / _dx;
 }
 
-double Explicit::L_y(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
-{
+double Explicit::L_y(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k) {
 	return (f[i][j][k] - f[i][j - 1][k]) / _dy;
 }
 
-double Explicit::L_z(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
-{
+double Explicit::L_z(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k) {
 	return (f[i][j][k] - f[i][j][k - 1]) / _dz;
 }
 
-double Explicit::H(int i, int j, int k)
-{
+double Explicit::H(int i, int j, int k) {
 	return 2 * ( pow(L_x(_u, i, j, k), 2) + pow(L_y(_v, i, j, k), 2) + pow(L_z(_w, i, j, k), 2)
 		+ 0.5 * pow(L_y(_u, i, j, k) + L_x(_v, i, j, k), 2)
 		+ 0.5 * pow(L_z(_v, i, j, k) + L_y(_w, i, j, k), 2)
@@ -178,55 +185,45 @@ double Explicit::H(int i, int j, int k)
 		- 2 / 3 * pow(L_x(_u, i, j, k) + L_y(_v, i, j, k) + L_z(_w, i, j, k), 2);
 }
 
-double Explicit::L_xx(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
-{
+double Explicit::L_xx(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k) {
 	return f[i + 1][j][k] - 2 * f[i][j][k] + f[i - 1][j][k];
 }
 
-double Explicit::L_yy(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
-{
+double Explicit::L_yy(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k) {
 	return f[i][j + 1][k] - 2 * f[i][j][k] + f[i][j - 1][k];
 }
 
-double Explicit::L_zz(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
-{
+double Explicit::L_zz(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k) {
 	return f[i][j][k + 1] - 2 * f[i][j][k] + f[i][j][k - 1];
 }
 
-double Explicit::L_xy(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
-{
+double Explicit::L_xy(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k) {
 	return 0.25 * (f[i + 1][j + 1][k] - f[i + 1][j - 1][k] - f[i - 1][j + 1][k] + f[i - 1][j - 1][k]);
 }
 
-double Explicit::L_xz(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
-{
+double Explicit::L_xz(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k) {
 	return 0.25 * (f[i + 1][j][k + 1] - f[i + 1][j][k - 1] - f[i - 1][j][k + 1] + f[i - 1][j][k - 1]);
 }
 
-double Explicit::L_yz(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k)
-{
+double Explicit::L_yz(std::vector<std::vector<std::vector<double>>> f, int i, int j, int k) {
 	return 0.25 * (f[i][j + 1][k + 1] - f[i][j + 1][k - 1] - f[i][j - 1][k + 1] + f[i][j - 1][k - 1]);
 }
 
-double Explicit::get_Pr()
-{
+double Explicit::get_Pr() {
 	return this->_Pr;
 }
 
-double Explicit::get_dt()
-{
+double Explicit::get_dt() {
 	return this->_dt;
 }
 
-void Explicit::write_init_file()
-{
+void Explicit::write_init_file() {
 	std::ofstream	f_out("init.txt");
 
 	f_out << _X << ' ' << _Y << ' ' << _Z << ' ' << _T << ' ' << _l << ' ' << _Nx << ' ' << _Ny << ' ' << _Nz << std::endl;
 }
 
-void Explicit::write_in_file(std::string name)
-{
+void Explicit::write_in_file(std::string name) {
 	std::vector<std::vector<std::vector<double>>>	array;
 	if (name == "ro")
 		array = _ro;

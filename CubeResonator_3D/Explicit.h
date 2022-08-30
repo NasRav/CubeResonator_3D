@@ -9,6 +9,7 @@
 class Explicit : public Resonator
 {
 public:
+	Explicit();
 	Explicit(double X, double Y, double Z, double T, double l, int Nx, int Ny, int Nz);
 
 	void	calculate_dt();
@@ -32,9 +33,9 @@ public:
 	void	write_in_file(std::string name);
 
 private:
-	const int		_Nx, _Ny, _Nz;
-	const double	_dx, _dy, _dz, _Pr, _U0;
-	double			_dt;
+	int		_Nx, _Ny, _Nz;
+	double	_dx, _dy, _dz, _Pr, _U0;
+	double	_dt;
 	std::vector<std::vector<std::vector<double>>>	_ro;
 	std::vector<std::vector<std::vector<double>>>	_u;
 	std::vector<std::vector<std::vector<double>>>	_v;
