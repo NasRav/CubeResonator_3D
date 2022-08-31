@@ -1,7 +1,7 @@
 NAME		=	CubeResonator_3D
 
 CLASSES		=	Resonator Explicit
-FILES		=	CubeResonator_3D $(CLASSES)
+FILES		=	$(NAME) $(CLASSES)
 SRCS		=	$(patsubst %,%.cpp,$(FILES))
 OBJS		=	$(patsubst %,%.o,$(FILES))
 HEADERS		=	$(patsubst %,%.h,$(CLASSES))

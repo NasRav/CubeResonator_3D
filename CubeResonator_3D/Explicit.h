@@ -29,13 +29,16 @@ public:
 
 	double	get_Pr();
 	double	get_dt();
+	double	get_dx();
+	double	get_dy();
+	double	get_dz();
 	void	write_init_file();
 	void	write_in_file(std::string name);
+	std::vector<std::vector<std::vector<double>>>	read_from_file(std::string name);
 
 private:
 	int		_Nx, _Ny, _Nz;
-	double	_dx, _dy, _dz, _Pr, _U0;
-	double	_dt;
+	double	_dx, _dy, _dz, _Pr, _U0, _dt;
 	std::vector<std::vector<std::vector<double>>>	_ro;
 	std::vector<std::vector<std::vector<double>>>	_u;
 	std::vector<std::vector<std::vector<double>>>	_v;

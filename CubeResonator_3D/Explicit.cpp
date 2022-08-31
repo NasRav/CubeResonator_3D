@@ -1,17 +1,62 @@
 #include "Explicit.h"
 
-Explicit::Explicit() :
-	Resonator()
+Explicit::Explicit()
 {
-	std::cout << "here" << std::endl;
-	_Pr = 0.7;
-/*	std::ifstream	in("init.txt");
-	std::string		line;
+	std::ifstream	f_in("init.txt");
+	if (f_in.is_open())
+		f_in >> _X >> _Y >> _Z >> _T >> _l >> _Nx >> _Ny >> _Nz;
+	f_in.close();
 
-	if (in.is_open())
-		getline(in, line);
-	in.close();
-	std::cout << line << std::endl;*/
+	_dx = _X / (_Nx - 1);
+	_dy = _Y / (_Ny - 1);
+	_dz = _Z / (_Nz - 1);
+	_Pr = 0.704;
+	_U0 = _l * _omega;
+	_ro.resize(_Nx);
+	_u.resize(_Nx);
+	_v.resize(_Nx);
+	_w.resize(_Nx);
+	_e.resize(_Nx);
+	d_ro.resize(_Nx);
+	d_u.resize(_Nx);
+	d_v.resize(_Nx);
+	d_w.resize(_Nx);
+	d_e.resize(_Nx);
+#pragma omp parallel for
+	for (int i = 0; i < _Nx; i++)
+	{
+		_ro[i].resize(_Ny);
+		_u[i].resize(_Ny);
+		_v[i].resize(_Ny);
+		_w[i].resize(_Ny);
+		_e[i].resize(_Ny);
+		d_ro[i].resize(_Ny);
+		d_u[i].resize(_Ny);
+		d_v[i].resize(_Ny);
+		d_w[i].resize(_Ny);
+		d_e[i].resize(_Ny);
+	}
+	for (int i = 0; i < _Nx; i++)
+#pragma omp parallel for
+		for (int j = 0; j < _Ny; j++)
+		{
+			_ro[i][j].resize(_Nz);
+			_u[i][j].resize(_Nz);
+			_v[i][j].resize(_Nz);
+			_w[i][j].resize(_Nz);
+			_e[i][j].resize(_Nz);
+			d_ro[i][j].resize(_Nz);
+			d_u[i][j].resize(_Nz);
+			d_v[i][j].resize(_Nz);
+			d_w[i][j].resize(_Nz);
+			d_e[i][j].resize(_Nz);
+		}
+
+	_ro = read_from_file("ro");
+	_u = read_from_file("u");
+	_v = read_from_file("v");
+	_w = read_from_file("w");
+	_e = read_from_file("e");
 }
 
 Explicit::Explicit(double X, double Y, double Z, double T, double l, int Nx, int Ny, int Nz) :
@@ -217,6 +262,18 @@ double Explicit::get_dt() {
 	return this->_dt;
 }
 
+double Explicit::get_dx() {
+	return this->_dx;
+}
+
+double Explicit::get_dy() {
+	return this->_dy;
+}
+
+double Explicit::get_dz() {
+	return this->_dz;
+}
+
 void Explicit::write_init_file() {
 	std::ofstream	f_out("init.txt");
 
@@ -250,4 +307,26 @@ void Explicit::write_in_file(std::string name) {
 		f_out << std::endl;
 	}
 	f_out.close();
+}
+
+std::vector<std::vector<std::vector<double>>>	Explicit::read_from_file(std::string name)
+{
+	std::vector<std::vector<std::vector<double>>>	array;
+	std::ifstream	f_in(name + "_3D_NonLinear_X=" + std::to_string(_X) + "_Y=" + std::to_string(_Y) + "_Z=" + std::to_string(_Z) + ".txt");
+	std::string		line;
+	if (f_in.is_open())
+	{
+		for (int k = 0; k < _Nz; k++)
+		{
+			for (int j = 0; j < _Ny; j++)
+			{
+				for (int i = 0; i < _Nx; i++)
+					f_in >> array[i][j][k];
+				std::getline(f_in, line);
+			}
+			std::getline(f_in, line);
+		}
+	}
+	f_in.close();
+	return array;
 }

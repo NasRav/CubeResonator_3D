@@ -1,7 +1,21 @@
 #include "Resonator.h"
 
 Resonator::Resonator() {
-	std::cout << "Resonator default constructor" << std::endl;
+	_X = 0.4;
+	_Y = 0.4;
+	_Z = 1;
+	_T = 288.15;
+	_l = 0.00005;
+	_ro0 = 1.225;
+	_mu = 1.82e-5;
+	_R_gas = 8.31;
+	_M_mol = 0.029;
+	_PI = acos(-1);
+	_gamma = 1.4;
+	_p0 = _ro0 * _R_gas * _T / _M_mol;
+	_c0 = sqrt(_gamma * _p0 / _ro0);
+	_omega = _PI * _c0 / _X;
+	_delta = sqrt(2 * _mu / (_omega * _ro0));
 }
 
 Resonator::Resonator(double X, double Y, double Z, double T, double l) :
